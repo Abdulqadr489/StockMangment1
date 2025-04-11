@@ -41,7 +41,7 @@ php artisan passport:client --personal
 here you can download the APIs test Post man (https://elements.getpostman.com/redirect?entityId=41011101-83a1602d-efc0-4546-9096-297824eb21da&entityType=collection)
 
 
-## End-pint exaplin
+## End-pints
 
 Item Categories: Manage different categories of items in the system.
 
