@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('brunch_id')->index()->constrained('branches');
             $table->date('transfer_date');
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->index()->default('pending');
             $table->softDeletes();
 
             $table->timestamps();

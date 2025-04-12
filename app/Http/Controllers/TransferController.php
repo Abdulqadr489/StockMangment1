@@ -44,10 +44,8 @@ class TransferController extends Controller
                 'brunch_id' => 'required|integer|exists:branches,id',
                 'transfer_date' => 'required|date',
                 'transfers' => 'required|array',
-
                 'transfers*.item_id' => 'required|integer|exists:items,id',
                 'transfers*.quantity' => 'required|integer|min:1',
-                'transfers*.transfer_id' => 'required|numeric|min:0',
             ]);
 
             $transfer = Transfer::create([
@@ -84,9 +82,6 @@ class TransferController extends Controller
                     ->where('item_id', $item['item_id'])
                     ->decrement('quantity', $item['quantity']);
             }
-
-
-
 
             DB::commit();
 
