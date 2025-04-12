@@ -16,7 +16,8 @@ php artisan key:generate
 
 php artisan passport:keys
 
- php artisan  migrate
+php artisan migrate:fresh --seed
+
 
 php artisan passport:client --personal -> after enter ask (name the personal access client: depend your clinet name. EX:client)
 ```
