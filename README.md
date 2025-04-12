@@ -6,7 +6,7 @@
 First clone this repository, install the dependencies, and setup .env file.
 
 ```
-git clone https://github.com/Abdulqadr489/StockManagment.git
+git clone https://github.com/Abdulqadr489/StockMangment1.git
 
 composer install
 
