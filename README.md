@@ -43,6 +43,8 @@ here you can download the APIs test Post man (https://elements.getpostman.com/re
 
 ## End-pints
 
+note: for tesing APIs from postman you have to first register and after login to get authenticate by using token
+
 Item Categories: Manage different categories of items in the system.
 
 Branches: Create, update, and manage different branches.
