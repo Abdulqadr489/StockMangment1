@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Branch;
 
+use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use ErrorException;
 use Illuminate\Http\Request;
@@ -77,7 +78,7 @@ class BranchController extends Controller
 
     }
 
-    
+
 
     /**
      * Show the form for editing the specified resource.

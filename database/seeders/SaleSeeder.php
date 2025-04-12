@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Http\Controllers\SaleController;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Http\Controllers\Sale\SaleController;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\Request;
 

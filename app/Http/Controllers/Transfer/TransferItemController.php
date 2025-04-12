@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Transfer;
 
+use App\Http\Controllers\Controller;
 use App\Models\TransferItem;
 use Illuminate\Http\Request;
 

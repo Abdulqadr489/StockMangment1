@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Item;
 
-use App\Models\BranchStock;
+use App\Http\Controllers\Controller;
+use App\Models\ItemCategory;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BranchStockController extends Controller
+class ItemCategoryController extends Controller
 {
-   /**
+    /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        BranchStock::all();
-
+        ItemCategory::all();
         return response()->json([
-            'message' => 'BranchStock retrieved successfully',
-            'data' => BranchStock::all(),
+            'message' => 'ItemCategorys retrieved successfully',
+            'data' => ItemCategory::all(),
         ], 200);
     }
 
@@ -39,18 +39,16 @@ class BranchStockController extends Controller
             DB::beginTransaction();
 
             $validatedData = $request->validate([
-                'item_id' => 'required|integer|exists:items,id',
-                'quantity' => 'required|integer',
-                'branch_id' => 'required|integer|exists:branches,id',
+                'category_name' => 'required|string|max:255',
             ]);
 
-            $branch = BranchStock::create($validatedData);
+            $ItemCategory = ItemCategory::create($validatedData);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'BranchStock created successfully',
-                'data' => $branch,
+                'message' => 'item categories created successfully',
+                'data' => $ItemCategory,
             ], 201);
 
         } catch (\Exception $e) {
@@ -66,7 +64,7 @@ class BranchStockController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BranchStock $branchStock)
+    public function show(ItemCategory $itemCategory)
     {
         //
     }
@@ -74,7 +72,7 @@ class BranchStockController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BranchStock $branchStock)
+    public function edit(ItemCategory $itemCategory)
     {
         //
     }
@@ -82,20 +80,18 @@ class BranchStockController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BranchStock $branch_stock)
+    public function update(Request $request, ItemCategory $category)
     {
         try{
             DB::beginTransaction();
             $validatedData = $request->validate([
-              'item_id' => 'required|integer|exists:items,id',
-                'quantity' => 'required|integer',
-                'branch_id' => 'required|integer|exists:branches,id',
+                'category_name' => 'required|string|max:255',
             ]);
-            $branch_stock->update($validatedData);
+            $category->update($validatedData);
             DB::commit();
             return response()->json([
-                'message' => 'branch_stock updated successfully',
-                'data' => $branch_stock,
+                'message' => 'category updated successfully',
+                'data' => $category,
             ], 200);
 
         }catch(ErrorException $e)
@@ -105,19 +101,21 @@ class BranchStockController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BranchStock $branch_stock)
+    public function destroy(ItemCategory $category)
     {
         try{
             DB::beginTransaction();
-            $branch_stock->delete();
+            $category->delete();
             DB::commit();
             return response()->json([
-                'message' => 'BranchStock deleted successfully',
+                'message' => 'category deleted successfully',
             ], 200);
 
         }catch(ErrorException $e)
@@ -127,5 +125,6 @@ class BranchStockController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+
     }
 }

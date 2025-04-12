@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Http\Controllers\TransferController;
+use App\Http\Controllers\Transfer\TransferController;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\Request;
 

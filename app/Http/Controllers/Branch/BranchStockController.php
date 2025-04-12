@@ -1,23 +1,25 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Branch;
 
-use App\Models\ItemCategory;
+use App\Http\Controllers\Controller;
+use App\Models\BranchStock;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ItemCategoryController extends Controller
+class BranchStockController extends Controller
 {
-    /**
+   /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        ItemCategory::all();
+        BranchStock::all();
+
         return response()->json([
-            'message' => 'ItemCategorys retrieved successfully',
-            'data' => ItemCategory::all(),
+            'message' => 'BranchStock retrieved successfully',
+            'data' => BranchStock::all(),
         ], 200);
     }
 
@@ -38,16 +40,18 @@ class ItemCategoryController extends Controller
             DB::beginTransaction();
 
             $validatedData = $request->validate([
-                'category_name' => 'required|string|max:255',
+                'item_id' => 'required|integer|exists:items,id',
+                'quantity' => 'required|integer',
+                'branch_id' => 'required|integer|exists:branches,id',
             ]);
 
-            $ItemCategory = ItemCategory::create($validatedData);
+            $branch = BranchStock::create($validatedData);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'item categories created successfully',
-                'data' => $ItemCategory,
+                'message' => 'BranchStock created successfully',
+                'data' => $branch,
             ], 201);
 
         } catch (\Exception $e) {
@@ -63,7 +67,7 @@ class ItemCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ItemCategory $itemCategory)
+    public function show(BranchStock $branchStock)
     {
         //
     }
@@ -71,7 +75,7 @@ class ItemCategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ItemCategory $itemCategory)
+    public function edit(BranchStock $branchStock)
     {
         //
     }
@@ -79,18 +83,20 @@ class ItemCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ItemCategory $category)
+    public function update(Request $request, BranchStock $branch_stock)
     {
         try{
             DB::beginTransaction();
             $validatedData = $request->validate([
-                'category_name' => 'required|string|max:255',
+              'item_id' => 'required|integer|exists:items,id',
+                'quantity' => 'required|integer',
+                'branch_id' => 'required|integer|exists:branches,id',
             ]);
-            $category->update($validatedData);
+            $branch_stock->update($validatedData);
             DB::commit();
             return response()->json([
-                'message' => 'category updated successfully',
-                'data' => $category,
+                'message' => 'branch_stock updated successfully',
+                'data' => $branch_stock,
             ], 200);
 
         }catch(ErrorException $e)
@@ -100,21 +106,19 @@ class ItemCategoryController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-
-
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ItemCategory $category)
+    public function destroy(BranchStock $branch_stock)
     {
         try{
             DB::beginTransaction();
-            $category->delete();
+            $branch_stock->delete();
             DB::commit();
             return response()->json([
-                'message' => 'category deleted successfully',
+                'message' => 'BranchStock deleted successfully',
             ], 200);
 
         }catch(ErrorException $e)
@@ -124,6 +128,5 @@ class ItemCategoryController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-
     }
 }

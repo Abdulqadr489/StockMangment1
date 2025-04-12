@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Item;
 
+use App\Http\Controllers\Controller;
 use App\Models\Item;
 use ErrorException;
 use Illuminate\Http\Request;

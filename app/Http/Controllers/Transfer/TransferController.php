@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Transfer;
 
+use App\Http\Controllers\Controller;
 use App\Models\BranchStock;
 use App\Models\Transfer;
-use App\Models\TransferItem;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

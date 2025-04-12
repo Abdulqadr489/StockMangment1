@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Sale;
 
-use App\Models\Branch;
+use App\Http\Controllers\Controller;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use ErrorException;

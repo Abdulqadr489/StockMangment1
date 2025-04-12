@@ -1,18 +1,16 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Branch\BranchController;
+use App\Http\Controllers\Branch\BranchStockController;
+use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Item\ItemCategoryController;
+use App\Http\Controllers\Item\ItemController;
+use App\Http\Controllers\Sale\SaleController;
+use App\Http\Controllers\Transfer\TransferController;
+use App\Http\Controllers\WareHouse\WarehouseStockController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BranchController;
-use App\Http\Controllers\BranchStockController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ItemCategoryController;
-use App\Http\Controllers\ItemController;
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\TransferController;
-use App\Http\Controllers\WarehouseStockController;
-use App\Models\Customer;
-use App\Models\ItemCategory;
 
 Route::get('/user', function (Request $request) {
     return $request->user();

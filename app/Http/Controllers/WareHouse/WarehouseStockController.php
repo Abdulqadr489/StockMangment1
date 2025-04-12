@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\WareHouse;
 
+use App\Http\Controllers\Controller;
 use App\Models\WarehouseStock;
 use ErrorException;
 use Illuminate\Http\Request;
