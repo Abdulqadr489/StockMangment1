@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Branch;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Brunch\BrunchRequest;
 use App\Models\Branch;
+use App\Models\Sale;
 use App\services\globalHelpers;
 use ErrorException;
 use Illuminate\Http\Request;
@@ -127,49 +128,61 @@ class BranchController extends Controller
         }
     }
 
-    public function getSpecificBranchSales($id)
+    public function getSpecificBranchSales(Request $request, $id)
     {
-        $branch = Branch::all()->findOrFail($id);
+        $branch = Branch::findOrFail($id);
+
+        $query = $branch->sales()->with('customer');
+
+        $this->applySearch($query, $request, 'name', 'customer');
+
+        $this->applySorting($query, $request);
+        $perPage = $request->input('per_page', 10);
+        $sales = $query->paginate($perPage);
 
         return $this->handleApiSuccess('Branch sales retrieved successfully', 200, [
-           'message' => 'Sales retrieved successfully for branch: ' . $branch->branch_name,
-            'data' => $branch->sales,
-        ]);
-
-    }
-
-    public function getAllBranchSales()
-    {
-        $branches = Branch::with(['sales','sales.customer'])->get(); // Eager load sales
-
-        return response()->json([
-            'message' => 'All branches sales retrieved successfully',
-            'data' => $branches->map(function ($branch) {
+            'branch_name' => $branch->branch_name,
+            'sales' => $sales->map(function ($sale) {
                 return [
-                    'branch_name' => $branch->branch_name,
-                    'sales' => $branch->sales->map(function ($sale) {
-                        return [
-                            'sale_id' => $sale->id,
-                            'customer_id' => $sale->customer->name ?? null,
-                            'sale_date' => $sale->sale_date,
-                            'total_amount' => $sale->total_amount,
-                        ];
-                    }),
+                    'sale_id' => $sale->id,
+                    'customer_id' => $sale->customer->name ?? null,
+                    'sale_date' => $sale->sale_date,
+                    'total_amount' => $sale->total_amount,
                 ];
             }),
-        ], 200);
-
-        return $this->handleApiSuccess('All branches sales retrieved successfully', 200, [
-            'branch_name' => $branch->branch_name,
-                    'sales' => $branch->sales->map(function ($sale) {
-                        return [
-                            'sale_id' => $sale->id,
-                            'customer_id' => $sale->customer->name ?? null,
-                            'sale_date' => $sale->sale_date,
-                            'total_amount' => $sale->total_amount,
-                        ];
-                    }),
         ]);
     }
+
+
+
+
+public function getAllBranchSales(Request $request)
+{
+    $query = Sale::with(['branch', 'customer']);
+
+    // Search by customer name
+    $this->applySearch($query, $request, 'branch_name', 'branch');
+
+    // Optional: search by branch name too
+    // $this->applySearch($query, $request, 'branch_name', 'branch');
+
+    $this->applySorting($query, $request);
+
+    $perPage = $request->input('per_page', 10);
+    $sales = $query->paginate($perPage);
+
+    return $this->handleApiSuccess('All branches sales retrieved successfully', 200, [
+        'sales' => $sales->map(function ($sale) {
+            return [
+                'branch_name' => $sale->branch->branch_name ?? null,
+                'sale_id' => $sale->id,
+                'customer_id' => $sale->customer->name ?? null,
+                'sale_date' => $sale->sale_date,
+                'total_amount' => $sale->total_amount,
+            ];
+        }),
+    ]);
+}
+
 
 }

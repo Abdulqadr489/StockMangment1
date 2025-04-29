@@ -38,7 +38,7 @@ php artisan passport:client --personal -> after enter ask (name the personal acc
 
 ## APIs
 
-here you can download the APIs test Post man (https://elements.getpostman.com/redirect?entityId=41011101-83a1602d-efc0-4546-9096-297824eb21da&entityType=collection)
+here you can download the APIs test Post man (https://www.postman.com/spacecraft-technologist-24415645/workspace/first/collection/41011101-83a1602d-efc0-4546-9096-297824eb21da?action=share&creator=41011101)
 
 
 ## End-pints
