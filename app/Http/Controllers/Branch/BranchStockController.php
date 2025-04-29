@@ -4,24 +4,42 @@ namespace App\Http\Controllers\Branch;
 
 use App\Http\Controllers\Controller;
 use App\Models\BranchStock;
-use ErrorException;
+use App\services\globalHelpers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class BranchStockController extends Controller
 {
+
+    use globalHelpers;
    /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        BranchStock::all();
+        $query = BranchStock::with(['item', 'branch']);
 
-        return response()->json([
-            'message' => 'BranchStock retrieved successfully',
-            'data' => BranchStock::all(),
-        ], 200);
+        $this->applySearch($query, request(), 'branch_name', 'branch');
+        $this->applySorting($query, request());
+
+        $data = $query->paginate(10);
+
+        return $this->handleApiSuccess('BranchStock fetched successfully', 200, [
+            'data' => $data->getCollection()->map(function ($stock) {
+                return [
+                    'branch_name' => $stock->branch?->branch_name,
+                    'item_name' => $stock->item?->item_name,
+                    'quantity' => $stock->quantity,
+                ];
+            }),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+            ]
+        ]);
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -36,32 +54,7 @@ class BranchStockController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            DB::beginTransaction();
 
-            $validatedData = $request->validate([
-                'item_id' => 'required|integer|exists:items,id',
-                'quantity' => 'required|integer',
-                'branch_id' => 'required|integer|exists:branches,id',
-            ]);
-
-            $branch = BranchStock::create($validatedData);
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'BranchStock created successfully',
-                'data' => $branch,
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Error creating branch',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
     }
 
     /**
@@ -85,27 +78,7 @@ class BranchStockController extends Controller
      */
     public function update(Request $request, BranchStock $branch_stock)
     {
-        try{
-            DB::beginTransaction();
-            $validatedData = $request->validate([
-              'item_id' => 'required|integer|exists:items,id',
-                'quantity' => 'required|integer',
-                'branch_id' => 'required|integer|exists:branches,id',
-            ]);
-            $branch_stock->update($validatedData);
-            DB::commit();
-            return response()->json([
-                'message' => 'branch_stock updated successfully',
-                'data' => $branch_stock,
-            ], 200);
 
-        }catch(ErrorException $e)
-        {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
     }
 
     /**
@@ -113,20 +86,6 @@ class BranchStockController extends Controller
      */
     public function destroy(BranchStock $branch_stock)
     {
-        try{
-            DB::beginTransaction();
-            $branch_stock->delete();
-            DB::commit();
-            return response()->json([
-                'message' => 'BranchStock deleted successfully',
-            ], 200);
 
-        }catch(ErrorException $e)
-        {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
     }
 }

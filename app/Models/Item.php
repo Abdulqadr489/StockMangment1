@@ -37,7 +37,12 @@ class Item extends Model
         return $this->hasMany(BranchStock::class);
     }
 
-    
+    public function warehouseStock()
+    {
+        return $this->hasMany(WarehouseStock::class, 'item_id');
+    }
+
+
 
 
 

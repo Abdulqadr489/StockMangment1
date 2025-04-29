@@ -3,24 +3,27 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\CustomerRequest;
 use App\Models\Customer;
 use ErrorException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
+
+    use \App\services\globalHelpers;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        Customer::all();
-
-        return response()->json([
-            'message' => 'Customers retrieved successfully',
-            'data' => Customer::all(),
-        ], 200);
+        $customers = Customer::query();
+        $this->applySearch($customers, request(), 'name');
+        $this->applySorting($customers, request());
+        $customers = $customers->paginate(10);
+        return $this->handleApiSuccess('Customers retrieved successfully', 200, [
+            'data' => $customers,
+        ]);
     }
 
     /**
@@ -34,50 +37,29 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CustomerRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $data = $request->all();
-            $isMultiple = is_array($data) && isset($data[0]);
-
-            $rules = $isMultiple
-                ? [
-                    '*.name' => 'required|string|max:255',
-                    '*.phone' => 'required|string|max:15',
-                ]
-                : [
-                    'name' => 'required|string|max:255',
-                    'phone' => 'required|string|max:15',
-                ];
-
-            $validatedData = $request->validate($rules);
-
             $customers = [];
-
-            if ($isMultiple) {
-                foreach ($validatedData as $customerData) {
-                    $customers[] = Customer::create($customerData);
-                }
-            } else {
-                $customers[] = Customer::create($validatedData);
+            foreach($request->validated() as $customerData) {
+                $customer = Customer::create($customerData);
+                $customers[] = $customer;
             }
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'Customer(s) created successfully',
+            return $this->handleApiSuccess('Customer(s) created successfully', 201, [
                 'data' => $customers,
-            ], 201);
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'message' => 'Error creating customer(s)',
+            return $this->handleApiException($e, 'An error occurred while creating the customer(s)', 500, [
                 'error' => $e->getMessage(),
-            ], 500);
+            ]);
         }
     }
 
@@ -101,27 +83,22 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(CustomerRequest $request, Customer $customer)
     {
         try{
             DB::beginTransaction();
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'phone' => 'required|string|max:15',
-            ]);
-            $customer->update($validatedData);
+
+            $customer->update($request->validated());
             DB::commit();
-            return response()->json([
-                'message' => 'Customer updated successfully',
+            return $this->handleApiSuccess('Customer updated successfully', 200, [
                 'data' => $customer,
-            ], 200);
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'An error occurred while updating the customer', 500, [
+                'error' => $e->getMessage(),
+            ]);
         }
 
     }
@@ -135,16 +112,15 @@ class CustomerController extends Controller
             DB::beginTransaction();
             $customer->delete();
             DB::commit();
-            return response()->json([
-                'message' => 'Branch deleted successfully',
-            ], 200);
+            return $this->handleApiSuccess('Customer deleted successfully', 200, [
+                'data' => $customer,
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'An error occurred while deleting the customer', 500, [
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

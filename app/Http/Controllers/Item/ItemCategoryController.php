@@ -3,22 +3,33 @@
 namespace App\Http\Controllers\Item;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Item\ItemCategory as ItemItemCategory;
 use App\Models\ItemCategory;
+use App\services\globalHelpers;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ItemCategoryController extends Controller
 {
+
+    use globalHelpers;
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        ItemCategory::all();
+        $query=ItemCategory::query();
+
+        $this->applySearch($query, $request,'category_name');
+
+        $this->applySorting($query, $request);
+
+        $categories = $query->paginate(10);
+
         return response()->json([
-            'message' => 'ItemCategorys retrieved successfully',
-            'data' => ItemCategory::all(),
+            'message' => 'item categories retrieved successfully',
+            'data' => $categories,
         ], 200);
     }
 
@@ -33,31 +44,22 @@ class ItemCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ItemItemCategory $request)
     {
         try {
             DB::beginTransaction();
 
-            $validatedData = $request->validate([
-                'category_name' => 'required|string|max:255',
-            ]);
-
-            $ItemCategory = ItemCategory::create($validatedData);
+            $ItemCategory = ItemCategory::create($request->validated());
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'item categories created successfully',
+            return $this->handleApiSuccess('Item category created successfully.', 201,[
                 'data' => $ItemCategory,
-            ], 201);
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return response()->json([
-                'message' => 'Error creating branch',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'An error occurred while creating the item category.',500);
         }
     }
 
@@ -80,29 +82,22 @@ class ItemCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ItemCategory $category)
+    public function update(ItemItemCategory $request, ItemCategory $category)
     {
         try{
             DB::beginTransaction();
-            $validatedData = $request->validate([
-                'category_name' => 'required|string|max:255',
-            ]);
-            $category->update($validatedData);
+
+            $category->update($request->validated());
+
             DB::commit();
-            return response()->json([
-                'message' => 'category updated successfully',
+            return $this->handleApiSuccess('Item category updated successfully.', 200,[
                 'data' => $category,
-            ], 200);
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'An error occurred while updating the item category.',500);
         }
-
-
     }
 
     /**
@@ -114,16 +109,13 @@ class ItemCategoryController extends Controller
             DB::beginTransaction();
             $category->delete();
             DB::commit();
-            return response()->json([
-                'message' => 'category deleted successfully',
-            ], 200);
+            return $this->handleApiSuccess('Item category deleted successfully.', 200,[
+                'data' => $category,
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'An error occurred while deleting the item category.',500);
         }
 
     }

@@ -3,24 +3,28 @@
 namespace App\Http\Controllers\Branch;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Brunch\BrunchRequest;
 use App\Models\Branch;
+use App\services\globalHelpers;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        Branch::all();
 
-        return response()->json([
-            'message' => 'Branches retrieved successfully',
-            'data' => Branch::all(),
-        ], 200);
+    use globalHelpers;
+
+    public function index(Request $request)
+    {
+        $query = Branch::query();
+
+        $this->applySearch($query, $request, 'branch_name');
+        $this->applySorting($query, $request);
+        $branches = $query->paginate(10);
+        return $this->handleApiSuccess('Branches retrieved successfully', 200, [
+            'data' => $branches,
+        ]);
     }
 
     /**
@@ -31,44 +35,32 @@ class BranchController extends Controller
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+
+    public function store(BrunchRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $validatedData = $request->validate([
-                '*.branch_name' => 'required|string|max:255',
-                '*.location' => 'required|string|max:255',
-            ]);
-
             $branches = [];
 
-            foreach ($validatedData as $branchData) {
+            foreach ($request->validated() as $branchData) {
                 $branches[] = Branch::create($branchData);
             }
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'Branches created successfully',
+            return $this->handleApiSuccess('Branches created successfully', 201, [
                 'data' => $branches,
-            ], 201);
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'message' => 'Error creating branches',
+            return $this->handleApiException($e, 'Failed to create branches', 500, [
                 'error' => $e->getMessage(),
-            ], 500);
+            ]);
         }
     }
-
-
-
 
     /**
      * Display the specified resource.
@@ -91,29 +83,24 @@ class BranchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Branch $branch)
+    public function update(BrunchRequest $request, Branch $branch)
     {
         try{
+
             DB::beginTransaction();
-            $validatedData = $request->validate([
-                'branch_name' => 'required|string|max:255',
-                'location' => 'required|string|max:255',
-            ]);
-            $branch->update($validatedData);
+
+            $branch->update($request->validated());
             DB::commit();
-            return response()->json([
-                'message' => 'Branch updated successfully',
+            return $this->handleApiSuccess('Branch updated successfully', 200, [
                 'data' => $branch,
-            ], 200);
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'Failed to update branch', 500, [
+                'error' => $e->getMessage(),
+            ]);
         }
-
 
     }
 
@@ -126,16 +113,15 @@ class BranchController extends Controller
             DB::beginTransaction();
             $branch->delete();
             DB::commit();
-            return response()->json([
-                'message' => 'Branch deleted successfully',
-            ], 200);
+            return $this->handleApiSuccess('Branch deleted successfully', 200, [
+                'data' => $branch,
+            ]);
 
         }catch(ErrorException $e)
         {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException($e, 'Failed to delete branch', 500, [
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -143,10 +129,11 @@ class BranchController extends Controller
     {
         $branch = Branch::all()->findOrFail($id);
 
-        return response()->json([
-            'message' => 'Sales retrieved successfully for branch: ' . $branch->branch_name,
+        return $this->handleApiSuccess('Branch sales retrieved successfully', 200, [
+           'message' => 'Sales retrieved successfully for branch: ' . $branch->branch_name,
             'data' => $branch->sales,
-        ], 200);
+        ]);
+
     }
 
     public function getAllBranchSales()
@@ -169,6 +156,18 @@ class BranchController extends Controller
                 ];
             }),
         ], 200);
+
+        return $this->handleApiSuccess('All branches sales retrieved successfully', 200, [
+            'branch_name' => $branch->branch_name,
+                    'sales' => $branch->sales->map(function ($sale) {
+                        return [
+                            'sale_id' => $sale->id,
+                            'customer_id' => $sale->customer->name ?? null,
+                            'sale_date' => $sale->sale_date,
+                            'total_amount' => $sale->total_amount,
+                        ];
+                    }),
+        ]);
     }
 
 }

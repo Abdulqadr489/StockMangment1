@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Http\Controllers\Sale\SaleController;
+use App\Http\Requests\Sale\SaleRequests;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\Request;
 
@@ -47,7 +48,12 @@ class SaleSeeder extends Seeder
 
         foreach ($salesData as $data) {
             $request = Request::create('/sales', 'POST', $data);
-            $controller->store($request);
+
+            $transferRequest = SaleRequests::createFrom($request);
+            $transferRequest->setContainer(app())->setRedirector(app('redirect'));
+            $transferRequest->validateResolved();
+
+            $controller->store($transferRequest);
         }
     }
 }

@@ -3,24 +3,38 @@
 namespace App\Http\Controllers\WareHouse;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\WareHouse\WareHouseRequest;
 use App\Models\WarehouseStock;
 use ErrorException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseStockController extends Controller
 {
+    use \App\services\globalHelpers;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        WarehouseStock::all();
+        $warehouseStocks = WarehouseStock::query();
 
-        return response()->json([
-            'message' => 'WarehouseStocks retrieved successfully',
-            'data' => WarehouseStock::all(),
-        ], 200);
+        $this->applySearch($warehouseStocks, request(), 'item_name', 'item');
+        $this->applySorting($warehouseStocks, request(),'item_id');
+
+        $data = $warehouseStocks->paginate(10);
+
+        return $this->handleApiSuccess(
+            'Warehouse stocks retrieved successfully',
+            200,
+            [
+                'data' => $data->getCollection()->map(function ($stock) {
+                    return [
+                        'item_name' => $stock->item?->item_name,
+                        'quantity' => $stock->quantity,
+                    ];
+                })
+            ]
+        );
     }
 
     /**
@@ -34,50 +48,36 @@ class WarehouseStockController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(WareHouseRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $data = $request->all();
-            $isMultiple = is_array($data) && isset($data[0]);
-
-            $rules = $isMultiple
-                ? [
-                    '*.item_id' => 'required|integer|exists:items,id',
-                    '*.quantity' => 'required|integer|min:1',
-                ]
-                : [
-                    'item_id' => 'required|integer|exists:items,id',
-                    'quantity' => 'required|integer|min:1',
-                ];
-
-            $validatedData = $request->validate($rules);
-
             $warehouseStocks = [];
 
-            if ($isMultiple) {
-                foreach ($validatedData as $stockData) {
-                    $warehouseStocks[] = WarehouseStock::create($stockData);
-                }
-            } else {
-                $warehouseStocks[] = WarehouseStock::create($validatedData);
+            foreach ($request->validated() as $stockData) {
+                $warehouseStocks[] = WarehouseStock::create($stockData);
             }
 
             DB::commit();
-
-            return response()->json([
-                'message' => 'Warehouse stock(s) created successfully',
-                'data' => $warehouseStocks,
-            ], 201);
-
+            return $this->handleApiSuccess(
+                'Warehouse stocks created successfully',
+                201,
+                [
+                    'data' => $warehouseStocks,
+                ]
+            );
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'message' => 'Error creating warehouse stock(s)',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException(
+                $e,
+                'Failed to create warehouse stocks',
+                500,
+                [
+                    'error' => $e->getMessage(),
+                ]
+            );
         }
     }
 
@@ -101,27 +101,30 @@ class WarehouseStockController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WarehouseStock $warehouse_stock)
+    public function update(WareHouseRequest $request, WarehouseStock $warehouse_stock)
     {
-        try{
+        try {
             DB::beginTransaction();
-            $validatedData = $request->validate([
-              'item_id' => 'required|integer|exists:items,id',
-                'quantity' => 'required|integer',
-            ]);
+            $validatedData = $request->validated();
             $warehouse_stock->update($validatedData);
             DB::commit();
-            return response()->json([
-                'message' => 'WarehouseStock updated successfully',
-                'data' => $warehouse_stock,
-            ], 200);
-
-        }catch(ErrorException $e)
-        {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiSuccess(
+                'WarehouseStock updated successfully',
+                200,
+                [
+                    'data' => $warehouse_stock,
+                ]
+            );
+        } catch (ErrorException $e) {
+            $this->handleApiException(
+                $e,
+                'Failed to update warehouse stock',
+                500,
+                [
+                    'error' => $e->getMessage(),
+                ]
+            );
+            DB::rollBack();
         }
     }
 
@@ -130,20 +133,27 @@ class WarehouseStockController extends Controller
      */
     public function destroy(WarehouseStock $warehouse_stock)
     {
-        try{
+        try {
             DB::beginTransaction();
             $warehouse_stock->delete();
             DB::commit();
-            return response()->json([
-                'message' => 'WarehouseStock deleted successfully',
-            ], 200);
-
-        }catch(ErrorException $e)
-        {
-            return response()->json([
-                'error' => 'An error occurred while processing your request.',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiSuccess(
+                'WarehouseStock deleted successfully',
+                200,
+                [
+                    'data' => $warehouse_stock,
+                ]
+            );
+        } catch (ErrorException $e) {
+            return $this->handleApiException(
+                $e,
+                'Failed to delete warehouse stock',
+                500,
+                [
+                    'error' => $e->getMessage(),
+                ]
+            );
+            DB::rollBack();
         }
     }
 }

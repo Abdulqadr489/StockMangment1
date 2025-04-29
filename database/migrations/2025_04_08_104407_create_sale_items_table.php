@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sale_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->index()->constrained('sales')->onDelete('cascade');
-            $table->foreignId('item_id')->index()->constrained('items')->onDelete('cascade');
+            $table->foreignId('item_id')->index()->constrained('branch_stocks')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);
             $table->decimal('discount', 10, 2)->default(0);

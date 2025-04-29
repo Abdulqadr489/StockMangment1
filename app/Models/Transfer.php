@@ -12,7 +12,6 @@ class Transfer extends Model
     protected $fillable = [
         'brunch_id',
         'transfer_date',
-        'status',
     ];
     protected $casts = [
         'transfer_date' => 'datetime',
@@ -23,13 +22,18 @@ class Transfer extends Model
         return $this->hasMany(TransferItem::class);
     }
 
-    public function branch()
+    public function brunch()
     {
-        return $this->belongsTo(Branch::class, 'brunch_id');
+        return $this->belongsTo(Branch::class);
     }
 
     public function transferItems()
     {
         return $this->hasMany(TransferItem::class, 'transfer_id', 'id');
+    }
+
+    public function brunchStock()
+    {
+        return $this->hasMany(BranchStock::class, 'branch_id', 'brunch_id');
     }
 }

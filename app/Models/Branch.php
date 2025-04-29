@@ -18,9 +18,14 @@ class Branch extends Model
         return $this->hasMany(Sale::class);
     }
 
-   
+
     public function customers()
     {
         return $this->hasMany(Customer::class);
+    }
+
+    public function transfer()
+    {
+        return $this->hasMany(Transfer::class);
     }
 }

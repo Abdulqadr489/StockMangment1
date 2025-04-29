@@ -27,4 +27,9 @@ class BranchStock extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function transfer()
+    {
+        return $this->hasMany(Transfer::class, 'brunch_id');
+    }
 }

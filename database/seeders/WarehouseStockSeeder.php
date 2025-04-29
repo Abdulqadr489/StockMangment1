@@ -2,30 +2,46 @@
 
 namespace Database\Seeders;
 
+use App\Http\Controllers\WareHouse\WarehouseStockController;
+use App\Http\Requests\WareHouse\WareHouseRequest;
 use App\Models\WarehouseStock;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\Request;
 
 class WarehouseStockSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
+
+
     public function run(): void
     {
-        WarehouseStock::create([
-            'item_id' => 1,
-            'quantity' => 60,
-        ]);
+        $datas = [
+            [
+                'item_id' => 1,
+                'quantity' => 60,
+            ],
+            [
+                'item_id' => 2,
+                'quantity' => 30,
+            ],
+            [
+                'item_id' => 3,
+                'quantity' => 20,
+            ]
+        ];
 
-        WarehouseStock::create([
-            'item_id' => 2,
-            'quantity' => 70,
-        ]);
+        $request = Request::create('/warehouse-stock', 'POST', $datas);
 
-        WarehouseStock::create([
-            'item_id' => 3,
-            'quantity' => 80,
-        ]);
+        $warehouseRequest = WareHouseRequest::createFrom($request);
+        $warehouseRequest->setContainer(app())->setRedirector(app('redirect'));
+        $warehouseRequest->validateResolved();
+
+        $controller = new WarehouseStockController();
+        $controller->store($warehouseRequest);
+
     }
+
 }
