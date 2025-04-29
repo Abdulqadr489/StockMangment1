@@ -21,7 +21,8 @@ class WarehouseStockController extends Controller
         $this->applySearch($warehouseStocks, request(), 'item_name', 'item');
         $this->applySorting($warehouseStocks, request(),'item_id');
 
-        $data = $warehouseStocks->paginate(10);
+        $per_page = request()->input('per_page', 10);
+        $data = $warehouseStocks->paginate($per_page);
 
         return $this->handleApiSuccess(
             'Warehouse stocks retrieved successfully',

@@ -12,7 +12,7 @@ class ItemDetail extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+        return app()->runningInConsole() || auth()->check();
     }
 
     /**

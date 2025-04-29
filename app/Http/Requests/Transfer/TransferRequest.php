@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests\Transfer;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -15,19 +14,21 @@ class TransferRequest extends FormRequest
     {
         $data = $this->all();
 
-        if (!isset($data[0]) || !is_array($data[0])) {
-            $this->replace([$data]);
+        // Ensure the request is always an array of transfers
+
+        if (!isset($data['transfers'])) {
+            $this->replace(['transfers' => []]);
         }
     }
 
     public function rules(): array
     {
         return [
-            '*.branch_id' => 'required|integer|exists:branches,id',
-            '*.transfer_date' => 'required|date',
-            '*.transfers' => 'required|array|min:1',
-            '*.transfers.*.item_id' => 'required|integer|exists:items,id',
-            '*.transfers.*.quantity' => 'required|integer|min:1',
+            'branch_id' => 'required|integer|exists:branches,id',
+            'transfer_date' => 'required|date',
+            'transfers' => 'required|array|min:1',
+            'transfers.*.item_id' => 'required|integer|exists:items,id',
+            'transfers.*.quantity' => 'required|integer|min:1',
         ];
     }
 }

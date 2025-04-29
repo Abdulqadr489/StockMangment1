@@ -25,7 +25,9 @@ class ItemCategoryController extends Controller
 
         $this->applySorting($query, $request);
 
-        $categories = $query->paginate(10);
+        $per_page = $request->input('per_page', 10);
+
+        $categories = $query->paginate($per_page);
 
         return response()->json([
             'message' => 'item categories retrieved successfully',
@@ -49,19 +51,26 @@ class ItemCategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $ItemCategory = ItemCategory::create($request->validated());
+            $validated = $request->validated(); // This is an array of arrays
+
+            $createdCategories = [];
+
+            foreach ($validated as $data) {
+                $createdCategories[] = ItemCategory::create($data);
+            }
 
             DB::commit();
 
-            return $this->handleApiSuccess('Item category created successfully.', 201,[
-                'data' => $ItemCategory,
+            return $this->handleApiSuccess('Item categories created successfully.', 201, [
+                'data' => $createdCategories,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->handleApiException($e, 'An error occurred while creating the item category.',500);
+            return $this->handleApiException($e, 'An error occurred while creating the item categories.', 500);
         }
     }
+
 
     /**
      * Display the specified resource.

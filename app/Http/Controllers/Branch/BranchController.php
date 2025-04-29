@@ -21,7 +21,9 @@ class BranchController extends Controller
 
         $this->applySearch($query, $request, 'branch_name');
         $this->applySorting($query, $request);
-        $branches = $query->paginate(10);
+
+        $per_page = $request->input('per_page', 10);
+        $branches = $query->paginate($per_page);
         return $this->handleApiSuccess('Branches retrieved successfully', 200, [
             'data' => $branches,
         ]);

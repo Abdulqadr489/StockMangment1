@@ -21,7 +21,8 @@ class SaleController extends Controller
         $data = Sale::query();
         $this->applySearch($data, request(), 'name', 'customer');
         $this->applySorting($data, request());
-        $data = $data->paginate(10);
+        $per_page = request()->input('per_page', 10);
+        $data = $data->paginate($per_page);
         return $this->handleApiSuccess(
             'Sales list retrieved successfully',
             200,
@@ -29,7 +30,7 @@ class SaleController extends Controller
                 'data' => $data->getCollection()->map(function ($sale) {
                     return [
                         'id' => $sale->id,
-                        'Custoemer' => $sale->customer->name ?? 'N/A',
+                        'customer' => $sale->customer->name ?? 'N/A',
                         'Phone' => $sale->customer->phone ?? 'N/A',
                         'item' => $sale->saleItems->map(function ($item) {
                             return [

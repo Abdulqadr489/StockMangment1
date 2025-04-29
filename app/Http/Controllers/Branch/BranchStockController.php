@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BranchStock;
 use App\services\globalHelpers;
 use Illuminate\Http\Request;
+use Symfony\Component\Console\Input\Input;
 
 class BranchStockController extends Controller
 {
@@ -21,7 +22,8 @@ class BranchStockController extends Controller
         $this->applySearch($query, request(), 'branch_name', 'branch');
         $this->applySorting($query, request());
 
-        $data = $query->paginate(10);
+        $per_page = request()->input('per_page', 10);
+        $data = $query->paginate($per_page);
 
         return $this->handleApiSuccess('BranchStock fetched successfully', 200, [
             'data' => $data->getCollection()->map(function ($stock) {

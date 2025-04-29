@@ -11,18 +11,31 @@ class ItemCategory extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+        return app()->runningInConsole() || auth()->check();
     }
+
+
 
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
+     protected function prepareForValidation()
+     {
+         $data = $this->all();
+
+         if (!isset($data[0]) || !is_array($data[0])) {
+             $this->replace([$data]);
+         }
+     }
+
+
     public function rules(): array
     {
         return [
-            'category_name' => 'required|string|max:255',
+            '*.category_name' => 'required|string|max:255',
         ];
     }
 }

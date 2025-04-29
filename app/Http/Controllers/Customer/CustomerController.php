@@ -20,7 +20,8 @@ class CustomerController extends Controller
         $customers = Customer::query();
         $this->applySearch($customers, request(), 'name');
         $this->applySorting($customers, request());
-        $customers = $customers->paginate(10);
+        $per_page = request()->input('per_page', 10);
+        $customers = $customers->paginate($per_page);
         return $this->handleApiSuccess('Customers retrieved successfully', 200, [
             'data' => $customers,
         ]);

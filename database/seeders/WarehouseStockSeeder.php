@@ -33,13 +33,13 @@ class WarehouseStockSeeder extends Seeder
             ]
         ];
 
+        $controller = new WarehouseStockController();
         $request = Request::create('/warehouse-stock', 'POST', $datas);
 
         $warehouseRequest = WareHouseRequest::createFrom($request);
         $warehouseRequest->setContainer(app())->setRedirector(app('redirect'));
         $warehouseRequest->validateResolved();
 
-        $controller = new WarehouseStockController();
         $controller->store($warehouseRequest);
 
     }

@@ -20,7 +20,8 @@ class TransferController extends Controller
         $data = Transfer::query();
         $this->applySearch($data, request(), 'branch_name', 'brunch');
         $this->applySorting($data, request());
-        $data = $data->paginate(10);
+        $per_page = request()->input('per_page', 10);
+        $data = $data->paginate($per_page);
         return $this->handleApiSuccess(
             'Transfer list retrieved successfully',
             200,
@@ -76,7 +77,7 @@ class TransferController extends Controller
                 }
 
                 $transfer->transferItems()->create([
-                    'brunch_id' => $validatedData['branch_id'],
+                    'transfer_id' => $transfer->id,
                     'item_id' => $item['item_id'],
                     'quantity' => $item['quantity'],
                 ]);

@@ -22,7 +22,9 @@ class ItemController extends Controller
 
         $this->applySearch($query, request(), 'item_name');
         $this->applySorting($query, request());
-        $items = $query->paginate(10);
+
+        $per_page = request()->input('per_page', 10);
+        $items = $query->paginate($per_page);
 
         return $this->handleApiSuccess('Items retrieved successfully', 200, [
             'data' => $items,

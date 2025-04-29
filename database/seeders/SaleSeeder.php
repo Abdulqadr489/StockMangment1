@@ -28,20 +28,7 @@ class SaleSeeder extends Seeder
                         "discount" => 5,
                     ]
                 ]
-            ],
-            [
-                "branch_id" => 2,
-                "sale_date" => "2025-04-10",
-                "customer_id" => 1,
-                "items" => [
-                    [
-                        "item_id" => 2,
-                        "quantity" => 2,
-                        "unit_price" => 100,
-                        "discount" => 2,
-                    ]
-                ]
-            ],
+            ]
         ];
 
         $controller = new SaleController();
